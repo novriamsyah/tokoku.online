@@ -3,18 +3,20 @@
 namespace App\Http\Livewire;
 
 use App\Models\Product;
+use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Cart;
 
 class ShopComponent extends Component
 {
-    public $sorting;
-    public $pagesize;
+    use WithPagination;
+    public $sortingData;
+    public $perPage;
 
     public function mount() {
-        $this->sorting = "default";
-        $this->pagesize = 12;
+        $this->sortingData = "default";
+        $this->perPage = 12;
     }
 
     public function store($product_id,$product_name,$product_price){
@@ -23,21 +25,28 @@ class ShopComponent extends Component
         return redirect()->route('product.cart');
     }
     
-
-    use WithPagination;
     public function render()
     {
-        if ($this->sorting == "date") {
-            $products = Product::orderBy('created_at', 'DESC')->paginate($this->pagesize);
-        } else if ($this->sorting == "price") {
-            $products = Product::orderBy('regular_price', 'ASC')->paginate($this->pagesize);
-        } else if ($this->sorting == "price_desc") {
-            $products = Product::orderBy('regular_price', 'DESC')->paginate($this->pagesize);
+        if ($this->sortingData == 'date') {
+
+            $products = Product::orderBy('created_at', 'desc')->paginate($this->perPage);
+
+        } else if ($this->sortingData == 'price') {
+
+            $products = Product::orderBy('regular_price', 'asc')->paginate($this->perPage);
+
+        } else if ($this->sortingData == 'price-desc') {
+
+            $products = Product::orderBy('regular_price', 'desc')->paginate($this->perPage);
+
         } else {
-            $products = Product::paginate($this->pagesize);
+
+            $products = Product::paginate($this->perPage);
+
         }
 
-        $products = Product::paginate(12);
-        return view('livewire.shop-component', ['products'=>$products])->layout("layouts.app1");
+        $categories = Category::all();
+
+        return view('livewire.shop-component', ['products'=>$products, 'categories'=>$categories])->layout("layouts.app1");
     }
 }
